@@ -1,0 +1,36 @@
+﻿@model IEnumerable<Glorius.Models.ViewModels.Shop.ProductVM>
+@using PagedList.Mvc;
+@using PagedList;
+@foreach (var product in ViewBag.OnePageOfProducts)
+{
+    <div class="product-item text-center">
+        @if (product.Discount != 0)
+        {
+            <div class="hidden">
+                <span class="discoun">скидка</span>
+            </div>
+        }
+        <span class="back">
+            <ul class="butn text-center">
+                <li>
+                    <form action="/Add" method="post">
+                        <input data-val="true" id="id" name="id" type="hidden" value="@product.Id">
+                        <input id="a" name="a" type="hidden" value="2">
+                        <input id="amount" name="amount" type="hidden" value="1">
+                        <input type="submit" value="Добавить в корзину">
+                    </form>
+                </li>
+                <li>
+                    <form action="/Add" method="post">
+                        <input data-val="true" id="id" name="id" type="hidden" value="@product.Id">
+                        <input id="a" name="a" type="hidden" value="1">
+                        <input id="amount" name="amount" type="hidden" value="1">
+                        <input type="submit" value="Купить">
+                    </form>
+                </li>
+                <li>@Html.ActionLink("Детали", "GetProduct", "Home", new { id = product.Id }, null)</li>
+            </ul>
+        </span><img width="200" height="200" style="object-fit: cover" src="@Url.Action("GetPreview", "Home",
+                        new { product.Id })" alt="">
+    </div>
+}

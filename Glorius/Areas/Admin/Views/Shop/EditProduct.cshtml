@@ -1,0 +1,188 @@
+﻿@model Glorius.Models.ViewModels.Shop.ProductVM
+
+@{
+    /**/
+
+    ViewBag.Title = "Edit Product";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+<br /><br />
+<h2>Редактор продукта</h2>
+
+@if (TempData["SM"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SM"]
+    </div>
+}
+<div>
+    @Html.ActionLink("К списку продуктов", "Products")
+</div>
+
+@using (Html.BeginForm("EditProduct", "Shop", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        <label class="control-label col-md-2" for="HasSidebar">Раздел</label>
+        <div class="col-md-10">
+            <select class="sec form-control" id="SectionId" name="SectionId">
+                @foreach (var item in Model.Sections)
+                {
+                    if (ViewBag.SelectedSec == item.Value)
+                    {
+                        <option selected value="@item.Value">@item.Text</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                }
+            </select>
+            <br />
+            <label class="control-label col-md-2" for="HasSidebar">Категория</label>
+            @Html.DropDownListFor(model => model.CategoryId, Model.Categories, "Категория", new { @class = "form-control" })
+            <br />
+            <label class="control-label col-md-2" for="HasSidebar">Материал</label>
+            @Html.DropDownListFor(model => model.MaterialId, Model.Materials, "Материал", new { @class = "form-control" })
+            @*@Html.DropDownListFor(model => model.SectionId, Model.Sections, "Раздел", new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.SectionId, "", new { @class = "text-danger" })*@
+        </div>
+    </div>
+    <div class="form-horizontal">
+        <hr /><hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.Id)
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Description, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextAreaFor(model => model.Description, new { @class = "form-control" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Price, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Price, new { htmlAttributes = new { @class = "form-control" } })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.Discount, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Discount, new { htmlAttributes = new { @class = "form-control" } })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-md-2" for="HasSidebar">Image</label>
+            <div class="col-md-10">
+                <img width="200" class="rounded mx-auto d-block"
+                     src="@Url.Action("GetPreview", "Shop",
+                        new { Model.Id })" enctype="multipart/form-data" />
+                <br /><br />
+                <img src="#" id="imgpreview" />
+                <br /><br />
+                <div class="col-md-10">
+                    <input type="file" name="image" id="ImageUpload" />
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10 admSub">
+                <input type="submit" value="Save" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+<hr />
+
+@foreach (var item in ViewBag.Ids)
+{
+    <div style="display: inline-block;margin-right: 15px;">
+        <img src="/Admin/Shop/GetGallery/@item" width="200" class="rounded mx-auto d-block" enctype="multipart/form-data" />
+        <br />
+        @Html.ActionLink("Удаить", "DeleteImg", "Shop", new { @class = "deleteimage", data_name = item })
+    </div>
+}
+
+<form action="/admin/shop/SaveGallaryImages/@Model.Id" method="post" enctype="multipart/form-data" class="dropzone" id="dropzoneForm">
+    <div class="fallback">
+        <input type="file" name="file" multiple />
+        <input type="submit" value="Upload" />
+    </div>
+</form>
+
+<link href="~/Scripts/dropzone/basic.css" rel="stylesheet" />
+<link href="~/Scripts/dropzone/dropzone.css" rel="stylesheet" />
+
+
+@section scripts{
+    <script src="~/Scripts/dropzone/dropzone.js"></script>
+    <script>
+
+        $(function () {
+
+            //preview select img
+
+            function readURL(input) {
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $("img#imgpreview")
+                            .attr("src", e.target.result)
+                            .width(200)
+                            .height(200)
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+            $("#ImageUpload").change(function () {
+                readURL(this);
+            });
+
+            Dropzone.options.dropzoneForm = {
+                acceptedFiles: "image/*",
+                init: function() {
+                this.on("complete", function (file) {
+                    if (this.getUploadingFiles().length === 0 && this.getQueuedFiles().length === 0) {
+                        location.reload();
+                    }
+                });
+
+                this.on("sending", function (file, xhr, formData) {
+                    formData.append("id", @Model.Id);
+                });
+                }
+            };
+
+            $("a.deleteimage").click(function (e) {
+                e.preventDefault();
+
+                if (!confirm("Удалить?")) return false;
+
+                var $this = $(this);
+                var url = "/admin/shop/DeleteImg";
+                var id = $this.data("name");
+
+                $.post(url, { id:id }, function (data) {
+                    $this.parent().fadeOut("fast");
+                });
+
+            });
+            $("select.sec").on("change", function () {
+                var sec = $("select.sec").val();
+                var id = @Model.Id;
+                window.location = "/admin/shop/EditProduct?secId=" + sec + "&id=" + id;
+            });
+        });
+
+    </script>
+}

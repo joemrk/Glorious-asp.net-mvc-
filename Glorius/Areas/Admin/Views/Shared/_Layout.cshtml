@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Area</title>
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/styl_e.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container admLink">
+            <div class="navbar-header">
+                @Html.ActionLink("Сайт", "Products", "Home", new { area = "" }, new { @class = "navbar-brand" })
+                <ul class="admLink d-flex">
+                    <li>@Html.ActionLink("Продукты", "Products", "Shop")</li>
+                    <li>@Html.ActionLink("Материалы", "Materials", "Shop")</li>
+                    <li>@Html.ActionLink("Категории", "Categories", "Shop")</li>
+                    <li>@Html.ActionLink("Разделы", "Sections", "Shop")</li>
+
+                    <li style="color: #fff;">Заказы(в разработке)</li>
+
+                </ul>
+            </div>
+            <div>
+                <ul class="nav d-flex admLink">
+                    <li><a href="/Account/Exit">Выход</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+
+    </div>
+    @Scripts.Render("~/bundles/scripts")
+    @RenderSection("scripts", required: false)
+
+
+</body>
+</html>

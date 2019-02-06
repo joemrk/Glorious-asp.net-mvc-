@@ -1,0 +1,47 @@
+﻿@{ 
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link href="~/Content/Site.css" rel="stylesheet" />
+</head>
+<body>
+    @if (TempData["SM"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SM"]
+        </div>
+    }
+    @using (Html.BeginForm("Login", "Account", FormMethod.Post))
+    {
+        <div class="content">
+            <div class="login">
+                <input type="text" name="Log" pattern="^[0-9A-z'.,-/]*$">
+                <input type="text" name="Pass" pattern="^[0-9A-z'.,-/]*$">
+                <br><br>
+                <div class="g-recaptcha display" data-sitekey="6Lf5t4sUAAAAAFcrE8xLxVMrx2SUQEgZ3QSju-zG"></div>
+                <br>
+                <input type="submit">
+            </div>
+        </div>
+    }
+    <script>
+        $('input[type=text]').on('input', (function () {
+            this.addEventListener('input', function () {
+                if (this.validity.valid) {
+                    this.classList.remove('nono');
+                    $('#sub').removeAttr('disabled');
+                }
+                else {
+                    this.classList.add('nono');
+                    $('#sub').attr('disabled', 'disabled');
+                }
+            });
+        }));
+    </script>
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+</body>
+</html>

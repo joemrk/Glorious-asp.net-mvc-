@@ -1,0 +1,154 @@
+﻿@model IEnumerable<Glorius.Models.ViewModels.Shop.SectionVM>
+
+@{
+    ViewBag.Title = "Sections";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Sections</h2>
+
+<div class="new-cat">
+    <input type="text" id="newcatname" />
+    <p>
+        <a href="#" id="newcata">Добавить новый раздел</a>
+        <span class="ajax-text admImg">
+            <img width="15" src="~/Content/img/ajax-loader.gif" />
+        </span>
+    </p>
+</div>
+
+<table class="table js-sorting categories" id="pages">
+    <tr class="home">
+        <th>
+            @Html.DisplayNameFor(model => model.Name)
+        </th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr id="id_@item.Id">
+            <td>
+                <div class="ajaxdivtd"></div>
+                @Html.EditorFor(modelItem => item.Name, new { htmlAttributes = new { @class = "text-box form-control", @readonly = "readonly", @style = "margin:10px" } })
+            </td>
+            <td>
+
+                @Html.ActionLink("Delete", "DeleteSection", new { id = item.Id }, new { @class = "js-delete btn btn-danger", @style = "margin:10px" })
+            </td>
+        </tr>
+    }
+</table>
+@section Scripts{
+
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script>
+    <script>
+        $(function () {
+            //add
+            var newCatA = $("a#newcata");
+            var newCatTextInput = $("#newcatname");
+            var ajaxText = $("span.ajax-text");
+            var table = $("table#pages tbody");
+
+            newCatTextInput.keyup(function (e) {
+                if (e.keyCode == 13) {
+                    newCatA.click();
+                }
+            });
+
+            newCatA.click(function (e) {
+                e.preventDefault();
+                var catName = newCatTextInput.val();
+                if (catName.length < 2) {
+                    alert("Длина имени должна быть больше двух символов")
+                    return false;
+                }
+
+                ajaxText.show();
+
+                var url = "/admin/shop/AddNewSection";
+
+                $.post(url, { secName: catName }, function (data) {
+                    var response = data.trim();
+                    if (response == "titletaken") {
+                        ajaxText.html("<span class='alert alert-danger'>Имя уже существует.</span>")
+                        setTimeout(function () {
+                            ajaxText.fadeOut("fast", function () {
+                                ajaxText.html("...");
+                            });
+                        }, 1000);
+                        return false;
+                    } else {
+                        if (!$("table#pages").length) {
+                            location.reload();
+                        } else {
+                            ajaxText.html("<span class='alert alert-success'>Категория добавлена</span>")
+                            setTimeout(function () {
+                                ajaxText.fadeOut("fast", function () {
+                                    ajaxText.html("...");
+                                });
+                            }, 1000);
+
+                            newCatTextInput.val("");
+
+                            var toAppend = $("table#pages tbody tr:last").clone();
+                            toAppend.attr("id", "id_" + data);
+                            toAppend.find("#item_Name").val(catName);
+                            toAppend.find("a.delete").attr("href", "/admin/shop/DeleteSection");
+                            table.append(toAppend);
+                            table.sortable("refresh");
+                        }
+                    }
+                });
+            });
+
+            //rename
+            var originalTextBoxValue;
+            $("table#pages input.text-box").dblclick(function () {
+                originalTextBoxValue = $(this).val();
+                $(this).attr("readonly", false);
+            });
+
+            $("table#pages input.text-box").keyup(function (e) {
+                if (e.keyCode == 13) {
+                    $(this).blur();
+                }
+
+            });
+            $("table#pages input.text-box").blur(function () {
+                var $this = $(this);
+                var ajaxdiv = $this.parent().find(".ajaxdivtd");
+                var newCatname = $this.val();
+                var id = $this.parent().parent().attr("id").substring(3);
+                var url = "/admin/shop/RenameSections";
+                if (newCatname.length < 2) {
+                    $this.attr("readonly", true);
+                    bootbox.alert("Длина имени должна быть больше 2х символов");
+                    return false;
+                }
+                $.post(url, { newCatName: newCatname, id: id }, function (data) {
+                    var response = data.trim();
+                    if (response == "titletaken") {
+                        $this.val(originalTextBoxValue);
+                        ajaxdiv.html("<span class='alert alert-danger'> Имя Уже существует </span>").show();
+
+                    } else {
+                        ajaxdiv.html("<span class='alert alert-success'> Имя изменено </span>").show();
+                    }
+                    setTimeout(function () {
+                        ajaxdiv.fadeOut("fast", function () {
+                            ajaxdiv.html("");
+                        });
+                    }, 2000);
+                }).done(function () {
+                    $this.attr("readonly", true);
+
+                });
+
+            });
+
+            //del
+            $("body").on("click", "a.delete", function () {
+                if (!confirm("Удалить категорию?")) return false;                
+            });
+        });
+    </script>
+}
