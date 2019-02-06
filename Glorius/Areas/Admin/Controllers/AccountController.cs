@@ -32,7 +32,6 @@ namespace Glorius.Controllers
                 sacretKey = loginModel.Log.ToString();
 
                 var response = Request["g-recaptcha-response"];
-                //sacretKey = "6Lf5t4sUAAAAABwQMB1qRnsgiNYk_310hodCBygG";
                 var client = new WebClient();
                 var result = client.DownloadString(string.Format("https://www.google.com/recaptcha/api/siteverify?sacret={0}&response={1}", sacretKey, response));
                 var obj = JObject.Parse(result);
